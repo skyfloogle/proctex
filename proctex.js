@@ -10,6 +10,10 @@ let form = document.forms["settings"];
 /** @type {HTMLTextAreaElement} */
 let textArea = document.getElementById("citro3d");
 
+let colorLut = document.getElementsByClassName('colorLut');
+let colorData = Array(colorLut.length * 4);
+let colorTex;
+
 function generateShaderSource() {
     const shifts = [
         "0.0",
@@ -43,7 +47,10 @@ function generateShaderSource() {
     return `#version 300 es
 
         in lowp vec2 vTexcoord;
+        uniform sampler2D uSampler;
         out lowp vec4 fragColor;
+
+        
         
         void main() {
             lowp float u = abs(vTexcoord.x);
@@ -58,8 +65,15 @@ function generateShaderSource() {
             v += v_shift;
             u = ${clamps[form.uClamp.value].replaceAll("{0}", "u")};
             v = ${clamps[form.vClamp.value].replaceAll("{0}", "v")};
-            lowp float lut_coord = ${maps[form.rgbFunc.value]};
-            lowp vec4 final_colour = vec4(lut_coord, lut_coord, lut_coord, ${form.alphaSeparate.checked ? maps[form.alphaFunc.value] : 'lut_coord'});
+            lowp float lut_coord = ${maps[form.rgbFunc.value]} * float(${form.texWidth.value - 1});
+            lowp vec4 final_colour = ${
+                form.minFilter.value % 2 != 0
+                // linear
+                ? `texture(uSampler, vec2((lut_coord + 0.5) / ${colorLut.length}.0, 0))`
+                // nearest
+                : "texelFetch(uSampler, ivec2(int(round(lut_coord)), 0), 0)"
+            };
+            ${form.alphaSeparate.checked ? `final_colour.a = ${maps[form.alphaFunc.value]};` : ''}
             fragColor = ${component_select[form.showComponent.value]};
         }
     `;
@@ -133,6 +147,15 @@ function setup() {
     );
     gl.enableVertexAttribArray(gl.getAttribLocation(shaderProgram, "aTexcoord"));
 
+    // setup color lut
+    colorTex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, colorTex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+
     // other setup
     gl.clearColor(0, 0, 0, 0);
     gl.enable(gl.BLEND);
@@ -142,6 +165,20 @@ function setup() {
 function draw() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
+    for (let i = 0; i < colorLut.length; i++) {
+        if (i < form.texWidth.value) {
+            colorLut[i].hidden = false;
+            let col = colorLut[i].value;
+            colorData[i * 4 + 0] = parseInt(col.substring(1, 3), 16);
+            colorData[i * 4 + 1] = parseInt(col.substring(3, 5), 16);
+            colorData[i * 4 + 2] = parseInt(col.substring(5, 7), 16);
+            colorData[i * 4 + 3] = 255;
+        } else {
+            colorLut[i].hidden = true;
+        }
+    }
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, colorLut.length, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(colorData));
+
     // refresh shader
     gl.detachShader(shaderProgram, fragShader);
     console.log(generateShaderSource());
@@ -149,11 +186,13 @@ function draw() {
     gl.compileShader(fragShader);
     if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
         alert("gen'd frag error: " + gl.getShaderInfoLog(fragShader));
+        return;
     }
     gl.attachShader(shaderProgram, fragShader);
     gl.linkProgram(shaderProgram);
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
         alert("gen'd link error: " + gl.getProgramInfoLog(shaderProgram));
+        return;
     }
     gl.useProgram(shaderProgram);
 

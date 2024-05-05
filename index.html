@@ -110,22 +110,30 @@
             <label for="vNoisePhase">V noise phase</label>
             <input type="number" value="0" step="0.0009765625" name="vNoisePhase" id="vNoisePhase">
         </div>
-        <div hidden>
+        <div>
             <label for="minFilter">Minification filter</label>
             <select name="minFilter" id="minFilter">
                 <option value="0">Nearest</option>
-                <option value="1">Linear</option>
-                <option value="2">Nearest, Mipmap Nearest</option>
-                <option value="3">Linear, Mipmap Nearest</option>
-                <option value="4">Nearest, Mipmap Linear</option>
-                <option value="5">Linear, Mipmap Linear</option>
+                <option value="1" selected>Linear</option>
+                <option hidden value="2">Nearest, Mipmap Nearest</option>
+                <option hidden value="3">Linear, Mipmap Nearest</option>
+                <option hidden value="4">Nearest, Mipmap Linear</option>
+                <option hidden value="5">Linear, Mipmap Linear</option>
             </select>
             <br>
             <label for="texWidth">Colour LUT size</label>
-            <input type="number" min="0" max="255" name="texWidth" id="texWidth">
-            <br>
-            <label for="texOffset">Colour LUT offset</label>
-            <input type="number" min="0" max="255" name="texOffset" id="texOffset">
+            <!-- real max is 255 -->
+            <input type="number" value="2" min="1" max="8" name="texWidth" id="texWidth">
+            <label hidden for="texOffset">Colour LUT offset</label>
+            <input hidden type="number" value="0" min="1" max="255" name="texOffset" id="texOffset">
+            <input type="color" name="colorLut0" class="colorLut" value="#000000">
+            <input type="color" name="colorLut1" class="colorLut" value="#ffffff">
+            <input type="color" name="colorLut2" class="colorLut">
+            <input type="color" name="colorLut3" class="colorLut">
+            <input type="color" name="colorLut4" class="colorLut">
+            <input type="color" name="colorLut4" class="colorLut">
+            <input type="color" name="colorLut6" class="colorLut">
+            <input type="color" name="colorLut7" class="colorLut">
         </div>
         <div hidden>
             <div hidden> <!-- not supported in citro3d -->
@@ -164,9 +172,10 @@
     </script>
     <script id="frag" type="x-shader/x-fragment">#version 300 es
         in lowp vec2 vTexcoord;
+        uniform sampler2D uSampler;
         out lowp vec4 fragColor;
         void main() {
-            fragColor = vec4(vTexcoord.x);
+            fragColor = texture(uSampler, vTexcoord);
         }
     </script>
     <script src="proctex.js"></script>
