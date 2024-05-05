@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ProcTex</title>
+</head>
+<body>
+    <h1>Hello!</h1>
+    <canvas id="tex" width="512" height="512" style="border: 1px solid black; background: repeat left top/16px 16px conic-gradient(#404040 90deg, #808080 90deg 180deg, #404040 180deg 270deg, #808080 270deg)"></canvas>
+
+    <form name="settings">
+        <select name="showComponent" id="showComponent">
+            <option value="0">RGB</option>
+            <option value="1">Alpha</option>
+            <option value="2">RGBA</option>
+        </select>
+        <div>
+            <label for="tcLeft">Left</label>
+            <input type="number" value="0" name="tcLeft" id="tcLeft">
+            <label for="tcTop">Top</label>
+            <input type="number" value="0" name="tcTop" id="tcTop">
+            <label for="tcRight">Right</label>
+            <input type="number" value="1" name="tcRight" id="tcRight">
+            <label for="tcBottom">Bottom</label>
+            <input type="number" value="1" name="tcBottom" id="tcBottom">
+        </div>
+        <div>
+            <label for="uClamp">U-clamp</label>
+            <select name="uClamp" id="uClamp">
+                <option value="0">Clamp to zero</option>
+                <option value="1">Clamp to edge</option>
+                <option value="2">Symmetrical repeat</option>
+                <option value="3">Mirrored repeat</option>
+                <option value="4">Pulse</option>
+            </select>
+            <br>
+            <label for="vClamp">V-clamp</label>
+            <select name="vClamp" id="vClamp">
+                <option value="0">Clamp to zero</option>
+                <option value="1">Clamp to edge</option>
+                <option value="2">Symmetrical repeat</option>
+                <option value="3">Mirrored repeat</option>
+                <option value="4">Pulse</option>
+            </select>
+            <br>
+            <label for="rgbFunc">RGB mapping function</label>
+            <select name="rgbFunc" id="rgbFunc">
+                <option value="0">U</option>
+                <option value="1">U²</option>
+                <option value="2">V</option>
+                <option value="3">V²</option>
+                <option value="4">(U + V) / 2</option>
+                <option value="5">(U² + V²) / 2</option>
+                <option value="6">sqrt(U² + V²)</option>
+                <option value="7">Minimum</option>
+                <option value="8">Maximum</option>
+                <option value="9">Rmax</option>
+            </select>
+            <br>
+            <label for="alphaFunc">Alpha mapping function</label>
+            <select name="alphaFunc" id="alphaFunc">
+                <option value="0">U</option>
+                <option value="1">U²</option>
+                <option value="2">V</option>
+                <option value="3">V²</option>
+                <option value="4">(U + V) / 2</option>
+                <option value="5">(U² + V²) / 2</option>
+                <option value="6">sqrt(U² + V²)</option>
+                <option value="7">Minimun</option>
+                <option value="8">Maximum</option>
+                <option value="9">Rmax</option>
+            </select>
+            <br>
+            <label for="alphaSeparate">Handle alpha separately</label>
+            <input type="checkbox" name="alphaSeparate" id="alphaSeparate">
+            <br>
+            <label for="uShift">U-shift</label>
+            <select name="uShift" id="uShift">
+                <option value="0">None</option>
+                <option value="1">Odd</option>
+                <option value="2">Even</option>
+            </select>
+            <br>
+            <label for="vShift">V-shift</label>
+            <select name="vShift" id="vShift">
+                <option value="0">None</option>
+                <option value="1">Odd</option>
+                <option value="2">Even</option>
+            </select>
+        </div>
+        <div hidden>
+            <label for="enableNoise">Noise enabled</label>
+            <input type="checkbox" name="enableNoise" id="enableNoise">
+            <br>
+            <label for="uNoiseAmpl">U noise amplitude</label>
+            <input type="number" value="0" step="0.000244140625" min="-7" max="7" name="uNoiseAmpl" id="uNoiseAmpl">
+            <br>
+            <label for="uNoiseFreq">U noise frequency</label>
+            <input type="number" value="0" step="0.0009765625" name="uNoiseFreq" id="uNoiseFreq">
+            <br>
+            <label for="uNoisePhase">U noise phase</label>
+            <input type="number" value="0" step="0.0009765625" name="uNoisePhase" id="uNoisePhase">
+            <br>
+            <label for="vNoiseAmpl">V noise amplitude</label>
+            <input type="number" value="0" step="0.000244140625" min="-7" max="7" name="vNoiseAmpl" id="vNoiseAmpl">
+            <br>
+            <label for="vNoiseFreq">V noise frequency</label>
+            <input type="number" value="0" step="0.0009765625" name="vNoiseFreq" id="vNoiseFreq">
+            <br>
+            <label for="vNoisePhase">V noise phase</label>
+            <input type="number" value="0" step="0.0009765625" name="vNoisePhase" id="vNoisePhase">
+        </div>
+        <div hidden>
+            <label for="minFilter">Minification filter</label>
+            <select name="minFilter" id="minFilter">
+                <option value="0">Nearest</option>
+                <option value="1">Linear</option>
+                <option value="2">Nearest, Mipmap Nearest</option>
+                <option value="3">Linear, Mipmap Nearest</option>
+                <option value="4">Nearest, Mipmap Linear</option>
+                <option value="5">Linear, Mipmap Linear</option>
+            </select>
+            <br>
+            <label for="texWidth">Colour LUT size</label>
+            <input type="number" min="0" max="255" name="texWidth" id="texWidth">
+            <br>
+            <label for="texOffset">Colour LUT offset</label>
+            <input type="number" min="0" max="255" name="texOffset" id="texOffset">
+        </div>
+        <div hidden>
+            <div hidden> <!-- not supported in citro3d -->
+                <label for="minLod" hidden>Min LOD</label>
+                <input type="number" min="0" max="15" value="0" name="minLod" id="minLod">
+                <br>
+                <label for="maxLod">Max LOD</label>
+                <input type="number" min="0" max="15" value="6" name="maxLod" id="maxLod">
+            </div>
+            <br>
+            <label for="lodBias">LOD bias</label>
+            <input type="number" name="lodBias" id="lodBias">
+            <br>
+            <div hidden> <!-- not supported in citro3d -->
+                <label for="mip1Offset">Mipmap level 1 offset</label>
+                <input type="number" min="0" max="255" value="128" name="mip1Offset" id="mip1Offset">
+                <br>
+                <label for="mip2Offset">Mipmap level 2 offset</label>
+                <input type="number" min="0" max="255" value="192" name="mip2Offset" id="mip2Offset">
+                <br>
+                <label for="mip3Offset">Mipmap level 3 offset</label>
+                <input type="number" min="0" max="255" value="224" name="mip3Offset" id="mip3Offset">
+            </div>
+        </div>
+    </form>
+    <textarea id="citro3d" readonly></textarea>
+
+    <script id="vert" type="x-shader/x-vertex">#version 300 es
+        in vec4 aPosition;
+        in vec2 aTexcoord;
+        out lowp vec2 vTexcoord;
+        void main() {
+            gl_Position = aPosition;
+            vTexcoord = aTexcoord;
+        }
+    </script>
+    <script id="frag" type="x-shader/x-fragment">#version 300 es
+        in lowp vec2 vTexcoord;
+        out lowp vec4 fragColor;
+        void main() {
+            fragColor = vec4(vTexcoord.x);
+        }
+    </script>
+    <script src="proctex.js"></script>
+</body>
+</html>
