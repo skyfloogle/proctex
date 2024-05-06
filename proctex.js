@@ -4,15 +4,42 @@ let texCoordBuffer;
 let fragShader;
 let shaderProgram;
 
+
+for (i = 0; i <= 128; i++) {
+    const row = document.getElementById("lutTable").appendChild(document.createElement("tr"));
+    row.appendChild(document.createElement("td")).innerText = i;
+    const noise = row.appendChild(document.createElement("td")).appendChild(document.createElement("input"));
+    noise.setAttribute("type", "number");
+    noise.setAttribute("min", -10);
+    noise.setAttribute("max", 10);
+    noise.setAttribute("value", i / 128);
+    noise.setAttribute("name", `noiseLut${i}`);
+    const rgb = row.appendChild(document.createElement("td")).appendChild(document.createElement("input"));
+    rgb.setAttribute("type", "number");
+    rgb.setAttribute("min", -10);
+    rgb.setAttribute("max", 10);
+    rgb.setAttribute("value", i / 128);
+    rgb.setAttribute("name", `rgbLut${i}`);
+    const alpha = row.appendChild(document.createElement("td")).appendChild(document.createElement("input"));
+    alpha.setAttribute("type", "number");
+    alpha.setAttribute("min", -10);
+    alpha.setAttribute("max", 10);
+    alpha.setAttribute("value", i / 128);
+    alpha.setAttribute("name", `alphaLut${i}`);
+}
+
 /** @type {HTMLFormElement} */
-let form = document.forms["settings"];
+const form = document.forms["settings"];
 
 /** @type {HTMLTextAreaElement} */
-let textArea = document.getElementById("citro3d");
+const textArea = document.getElementById("citro3d");
 
-let colorLut = document.getElementsByClassName('colorLut');
-let colorData = Array(colorLut.length * 4);
+const colorLut = document.getElementsByClassName('colorLut');
+const colorData = Array(colorLut.length * 4);
 let colorTex;
+
+const lutData = Array(256 * 3);
+let lutTex;
 
 function generateShaderSource() {
     const shifts = [
@@ -48,9 +75,13 @@ function generateShaderSource() {
 
         in lowp vec2 vTexcoord;
         uniform sampler2D uSampler;
+        uniform sampler2D uLutData;
         out lowp vec4 fragColor;
 
-        
+        lowp vec3 readLut(lowp float coord) {
+            // TODO actual lut
+            return vec3(coord, coord, coord);
+        }
         
         void main() {
             lowp float u = abs(vTexcoord.x);
@@ -65,7 +96,7 @@ function generateShaderSource() {
             v += v_shift;
             u = ${clamps[form.uClamp.value].replaceAll("{0}", "u")};
             v = ${clamps[form.vClamp.value].replaceAll("{0}", "v")};
-            lowp float lut_coord = ${maps[form.rgbFunc.value]} * float(${form.texWidth.value - 1});
+            lowp float lut_coord = readLut(${maps[form.rgbFunc.value]}).g * float(${form.texWidth.value - 1});
             lowp vec4 final_colour = ${
                 form.minFilter.value % 2 != 0
                 // linear
@@ -73,7 +104,7 @@ function generateShaderSource() {
                 // nearest
                 : "texelFetch(uSampler, ivec2(int(round(lut_coord)), 0), 0)"
             };
-            ${form.alphaSeparate.checked ? `final_colour.a = ${maps[form.alphaFunc.value]};` : ''}
+            ${form.alphaSeparate.checked ? `final_colour.a = readLut(${maps[form.alphaFunc.value]}).b;` : ''}
             fragColor = ${component_select[form.showComponent.value]};
         }
     `;
@@ -149,12 +180,23 @@ function setup() {
 
     // setup color lut
     colorTex = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, colorTex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
+
+    // setup other lut
+    lutTex = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, lutTex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uLutData"), 1);
 
     // other setup
     gl.clearColor(0, 0, 0, 0);
@@ -177,7 +219,16 @@ function draw() {
             colorLut[i].hidden = true;
         }
     }
+    gl.activeTexture(gl.TEXTURE0);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, colorLut.length, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(colorData));
+
+    for (let i = 0; i <= 128; i++) {
+        lutData[i * 3 + 0] = form[`noiseLut${i}`].value * 255;
+        lutData[i * 3 + 1] = form[`rgbLut${i}`].value * 255;
+        lutData[i * 3 + 2] = form[`alphaLut${i}`].value * 255;
+    }
+    gl.activeTexture(gl.TEXTURE1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 256, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, new Uint8Array(lutData));
 
     // refresh shader
     gl.detachShader(shaderProgram, fragShader);

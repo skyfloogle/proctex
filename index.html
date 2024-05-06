@@ -158,6 +158,14 @@
                 <input type="number" min="0" max="255" value="224" name="mip3Offset" id="mip3Offset">
             </div>
         </div>
+        <table id="lutTable">
+            <tr>
+                <td></td>
+                <th>Noise LUT</th>
+                <th>RGB LUT</th>
+                <th>Alpha LUT</th>
+            </tr>
+        </table>
     </form>
     <textarea id="citro3d" readonly></textarea>
 
@@ -173,9 +181,10 @@
     <script id="frag" type="x-shader/x-fragment">#version 300 es
         in lowp vec2 vTexcoord;
         uniform sampler2D uSampler;
+        uniform sampler2D uLutData;
         out lowp vec4 fragColor;
         void main() {
-            fragColor = texture(uSampler, vTexcoord);
+            fragColor = texture(uSampler, vTexcoord) + texture(uLutData, vTexcoord);
         }
     </script>
     <script src="proctex.js"></script>
