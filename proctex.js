@@ -24,7 +24,7 @@ function generateShaderSource() {
         "{0} > 1.0 ? 0.0 : {0}",
         "min({0}, 1.0)",
         "fract({0})",
-        "trunc({0}) == 0.0 ? fract({0}) : 1.0 - fract({0})",
+        "int({0}) % 2 == 0 ? fract({0}) : 1.0 - fract({0})",
         "{0} > 0.5 ? 1.0 : 0.0"
     ]
     const maps = [
