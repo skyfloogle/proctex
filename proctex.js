@@ -12,13 +12,14 @@ for (i = 0; i <= 128; i++) {
     noise.setAttribute("type", "number");
     noise.setAttribute("min", -10);
     noise.setAttribute("max", 10);
-    noise.setAttribute("value", i / 128);
+    const x = i/128;
+    noise.setAttribute("value", x*x*(3-2*x));
     noise.setAttribute("name", `noiseLut${i}`);
     const rgb = row.appendChild(document.createElement("td")).appendChild(document.createElement("input"));
     rgb.setAttribute("type", "number");
     rgb.setAttribute("min", -10);
     rgb.setAttribute("max", 10);
-    rgb.setAttribute("value", i / 128);
+    rgb.setAttribute("value", Math.sin(6*(i/128+0.125)*Math.PI*2));
     rgb.setAttribute("name", `rgbLut${i}`);
     const alpha = row.appendChild(document.createElement("td")).appendChild(document.createElement("input"));
     alpha.setAttribute("type", "number");
@@ -81,20 +82,56 @@ function generateShaderSource() {
         lowp vec3 readLut(lowp float coord) {
             return texture(uLutData, vec2(coord / 2.0, 0.0)).rgb;
         }
+
+        int ProcTexNoiseRand1D(int v) {
+            const int table[] = int[](0,4,10,8,4,9,7,12,5,15,13,14,11,15,2,11);
+            return ((v % 9 + 2) * 3 & 0xF) ^ table[(v / 9) & 0xF];
+        }
+        
+        lowp float ProcTexNoiseRand2D(lowp vec2 point) {
+            const int table[] = int[](10,2,15,8,0,7,4,5,5,13,2,6,13,9,3,14);
+            int u2 = ProcTexNoiseRand1D(int(point.x));
+            int v2 = ProcTexNoiseRand1D(int(point.y));
+            v2 += ((u2 & 3) == 1) ? 4 : 0;
+            v2 ^= (u2 & 1) * 6;
+            v2 += 10 + u2;
+            v2 &= 0xF;
+            v2 ^= table[u2];
+            return -1.0 + float(v2) * (2.0 / 15.0);
+        }
+        
+        lowp float ProcTexNoiseCoef(lowp vec2 x) {
+            lowp vec2 grid  = 9.0 * vec2(${form.uNoiseFreq.value}, ${form.vNoiseFreq.value}) * abs(x + vec2(${form.uNoisePhase.value}, ${form.vNoisePhase.value}));
+            lowp vec2 point = floor(grid);
+            lowp vec2 frac  = grid - point;
+        
+            lowp float g0 = ProcTexNoiseRand2D(point) * (frac.x + frac.y);
+            lowp float g1 = ProcTexNoiseRand2D(point + vec2(1.0, 0.0)) * (frac.x + frac.y - 1.0);
+            lowp float g2 = ProcTexNoiseRand2D(point + vec2(0.0, 1.0)) * (frac.x + frac.y - 1.0);
+            lowp float g3 = ProcTexNoiseRand2D(point + vec2(1.0, 1.0)) * (frac.x + frac.y - 2.0);
+        
+            lowp float x_noise = readLut(frac.x).r;
+            lowp float y_noise = readLut(frac.y).r;
+            lowp float x0 = mix(g0, g1, x_noise);
+            lowp float x1 = mix(g2, g3, x_noise);
+            return mix(x0, x1, y_noise);
+        }
         
         void main() {
-            lowp float u = abs(vTexcoord.x);
-            lowp float v = abs(vTexcoord.y);
+            lowp vec2 uv = abs(vTexcoord);
             lowp float u_shift = ${shifts[form.uShift.value]
                 .replaceAll("{0}", form.uClamp.value == 3 ? "1.0" : "0.5")
-                .replaceAll("{1}", "v")};
+                .replaceAll("{1}", "uv.y")};
             lowp float v_shift = ${shifts[form.vShift.value]
                 .replaceAll("{0}", form.vClamp.value == 3 ? "1.0" : "0.5")
-                .replaceAll("{1}", "u")};
-            u += u_shift;
-            v += v_shift;
-            u = ${clamps[form.uClamp.value].replaceAll("{0}", "u")};
-            v = ${clamps[form.vClamp.value].replaceAll("{0}", "v")};
+                .replaceAll("{1}", "uv.x")};
+            ${form.enableNoise.checked ? `uv += vec2(${form.uNoiseAmpl.value}, ${form.vNoiseAmpl.value}) * ProcTexNoiseCoef(uv);` : ""}
+            uv.x += u_shift;
+            uv.y += v_shift;
+            uv.x = ${clamps[form.uClamp.value].replaceAll("{0}", "uv.x")};
+            uv.y = ${clamps[form.vClamp.value].replaceAll("{0}", "uv.y")};
+            lowp float u = uv.x;
+            lowp float v = uv.y;
             lowp float lut_coord = readLut(${maps[form.rgbFunc.value]}).g * float(${form.texWidth.value - 1});
             lowp vec4 final_colour = ${
                 form.minFilter.value % 2 != 0
