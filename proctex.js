@@ -79,8 +79,7 @@ function generateShaderSource() {
         out lowp vec4 fragColor;
 
         lowp vec3 readLut(lowp float coord) {
-            // TODO actual lut
-            return vec3(coord, coord, coord);
+            return texture(uLutData, vec2(coord / 2.0, 0.0)).rgb;
         }
         
         void main() {
@@ -207,6 +206,23 @@ function setup() {
 function draw() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
+    // refresh shader
+    gl.detachShader(shaderProgram, fragShader);
+    console.log(generateShaderSource());
+    gl.shaderSource(fragShader, generateShaderSource());
+    gl.compileShader(fragShader);
+    if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
+        alert("gen'd frag error: " + gl.getShaderInfoLog(fragShader));
+        return;
+    }
+    gl.attachShader(shaderProgram, fragShader);
+    gl.linkProgram(shaderProgram);
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        alert("gen'd link error: " + gl.getProgramInfoLog(shaderProgram));
+        return;
+    }
+    gl.useProgram(shaderProgram);
+
     for (let i = 0; i < colorLut.length; i++) {
         if (i < form.texWidth.value) {
             colorLut[i].hidden = false;
@@ -229,23 +245,8 @@ function draw() {
     }
     gl.activeTexture(gl.TEXTURE1);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 256, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, new Uint8Array(lutData));
-
-    // refresh shader
-    gl.detachShader(shaderProgram, fragShader);
-    console.log(generateShaderSource());
-    gl.shaderSource(fragShader, generateShaderSource());
-    gl.compileShader(fragShader);
-    if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
-        alert("gen'd frag error: " + gl.getShaderInfoLog(fragShader));
-        return;
-    }
-    gl.attachShader(shaderProgram, fragShader);
-    gl.linkProgram(shaderProgram);
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-        alert("gen'd link error: " + gl.getProgramInfoLog(shaderProgram));
-        return;
-    }
-    gl.useProgram(shaderProgram);
+    // necessary for some reason
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uLutData"), 1);
 
     // refresh texture coordinates
     gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
