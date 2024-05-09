@@ -125,7 +125,7 @@ function generateShaderSource() {
             lowp float v_shift = ${shifts[form.vShift.value]
                 .replaceAll("{0}", form.vClamp.value == 3 ? "1.0" : "0.5")
                 .replaceAll("{1}", "uv.x")};
-            ${form.enableNoise.checked ? `uv += vec2(${form.uNoiseAmpl.value}, ${form.vNoiseAmpl.value}) * ProcTexNoiseCoef(uv);` : ""}
+            ${form.enableNoise.checked ? `uv = abs(uv + vec2(${form.uNoiseAmpl.value}, ${form.vNoiseAmpl.value}) * ProcTexNoiseCoef(uv));` : ""}
             uv.x += u_shift;
             uv.y += v_shift;
             uv.x = ${clamps[form.uClamp.value].replaceAll("{0}", "uv.x")};
@@ -222,17 +222,15 @@ function setup() {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uSampler"), 0);
 
     // setup other lut
     lutTex = gl.createTexture();
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, lutTex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.uniform1i(gl.getUniformLocation(shaderProgram, "uLutData"), 1);
 
     // other setup
     gl.clearColor(0, 0, 0, 0);
@@ -276,12 +274,12 @@ function draw() {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, colorLut.length, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(colorData));
 
     for (let i = 0; i <= 128; i++) {
-        lutData[i * 3 + 0] = form[`noiseLut${i}`].value * 255;
-        lutData[i * 3 + 1] = form[`rgbLut${i}`].value * 255;
-        lutData[i * 3 + 2] = form[`alphaLut${i}`].value * 255;
+        lutData[i * 3 + 0] = Math.abs(form[`noiseLut${i}`].value);
+        lutData[i * 3 + 1] = Math.abs(form[`rgbLut${i}`].value);
+        lutData[i * 3 + 2] = Math.abs(form[`alphaLut${i}`].value);
     }
     gl.activeTexture(gl.TEXTURE1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 256, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, new Uint8Array(lutData));
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB32F, 256, 1, 0, gl.RGB, gl.FLOAT, new Float32Array(lutData));
     // necessary for some reason
     gl.uniform1i(gl.getUniformLocation(shaderProgram, "uLutData"), 1);
 
