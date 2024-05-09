@@ -4,30 +4,7 @@ let texCoordBuffer;
 let fragShader;
 let shaderProgram;
 
-
-for (i = 0; i <= 128; i++) {
-    const row = document.getElementById("lutTable").appendChild(document.createElement("tr"));
-    row.appendChild(document.createElement("td")).innerText = i;
-    const noise = row.appendChild(document.createElement("td")).appendChild(document.createElement("input"));
-    noise.setAttribute("type", "number");
-    noise.setAttribute("min", -10);
-    noise.setAttribute("max", 10);
-    const x = i/128;
-    noise.setAttribute("value", x*x*(3-2*x));
-    noise.setAttribute("name", `noiseLut${i}`);
-    const rgb = row.appendChild(document.createElement("td")).appendChild(document.createElement("input"));
-    rgb.setAttribute("type", "number");
-    rgb.setAttribute("min", -10);
-    rgb.setAttribute("max", 10);
-    rgb.setAttribute("value", Math.sin(6*(i/128+0.125)*Math.PI*2));
-    rgb.setAttribute("name", `rgbLut${i}`);
-    const alpha = row.appendChild(document.createElement("td")).appendChild(document.createElement("input"));
-    alpha.setAttribute("type", "number");
-    alpha.setAttribute("min", -10);
-    alpha.setAttribute("max", 10);
-    alpha.setAttribute("value", i / 128);
-    alpha.setAttribute("name", `alphaLut${i}`);
-}
+const parser = new exprEval.Parser();
 
 /** @type {HTMLFormElement} */
 const form = document.forms["settings"];
@@ -238,6 +215,21 @@ function setup() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 }
 
+/**
+ * 
+ * @param {HTMLInputElement} input 
+ * @param {number} offset 
+ */
+function updateLut(input, offset) {
+    try {
+        const expr = parser.parse(input.value);
+        for (let i = 0; i <= 128; i++) lutData[i * 3 + offset] = expr.evaluate({x: i/128});
+        input.style.backgroundColor = 'white';
+    } catch (e) {
+        input.style.backgroundColor = 'red';
+    }
+}
+
 function draw() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -273,11 +265,9 @@ function draw() {
     gl.activeTexture(gl.TEXTURE0);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, colorLut.length, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(colorData));
 
-    for (let i = 0; i <= 128; i++) {
-        lutData[i * 3 + 0] = Math.abs(form[`noiseLut${i}`].value);
-        lutData[i * 3 + 1] = Math.abs(form[`rgbLut${i}`].value);
-        lutData[i * 3 + 2] = Math.abs(form[`alphaLut${i}`].value);
-    }
+    updateLut(form.noiseLut, 0);
+    updateLut(form.rgbLut, 1);
+    updateLut(form.alphaLut, 2);
     gl.activeTexture(gl.TEXTURE1);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB32F, 256, 1, 0, gl.RGB, gl.FLOAT, new Float32Array(lutData));
     // necessary for some reason

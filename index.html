@@ -5,8 +5,9 @@
     <title>ProcTex</title>
 </head>
 <body>
-    <h1>Hello!</h1>
+    <h1>ProcTex</h1>
     <canvas id="tex" width="512" height="512" style="border: 1px solid black; background: repeat left top/16px 16px conic-gradient(#404040 90deg, #808080 90deg 180deg, #404040 180deg 270deg, #808080 270deg)"></canvas>
+    <p><a href="https://silentmatt.com/javascript-expression-evaluator/#expressionsyntax">Formula documentation</a></p>
 
     <form name="settings">
         <select name="showComponent" id="showComponent">
@@ -109,6 +110,9 @@
             <br>
             <label for="vNoisePhase">V noise phase</label>
             <input type="number" value="0" step="0.0009765625" name="vNoisePhase" id="vNoisePhase">
+            <br>
+            <label for="noiseLut">Noise LUT formula</label>
+            <input value="x*x*(3-2*x)" name="noiseLut" id="noiseLut">
         </div>
         <div>
             <label for="minFilter">Minification filter</label>
@@ -134,6 +138,12 @@
             <input type="color" name="colorLut4" class="colorLut">
             <input type="color" name="colorLut6" class="colorLut">
             <input type="color" name="colorLut7" class="colorLut">
+            <br>
+            <label for="rgbLut">RGB LUT formula</label>
+            <input value="sin(6*(x+0.125)*PI*2)" name="rgbLut" id="rgbLut">
+            <br>
+            <label for="alphaLut">Alpha LUT formula</label>
+            <input value="sin(6*(x+0.125)*PI*2)" name="alphaLut" id="alphaLut">
         </div>
         <div hidden>
             <div hidden> <!-- not supported in citro3d -->
@@ -158,14 +168,6 @@
                 <input type="number" min="0" max="255" value="224" name="mip3Offset" id="mip3Offset">
             </div>
         </div>
-        <table id="lutTable">
-            <tr>
-                <td></td>
-                <th>Noise LUT</th>
-                <th>RGB LUT</th>
-                <th>Alpha LUT</th>
-            </tr>
-        </table>
     </form>
     <textarea id="citro3d" readonly></textarea>
 
@@ -187,6 +189,7 @@
             fragColor = texture(uSampler, vTexcoord) + texture(uLutData, vTexcoord);
         }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/expr-eval/2.0.2/bundle.js"></script>
     <script src="proctex.js"></script>
 </body>
 </html>
