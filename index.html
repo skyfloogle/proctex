@@ -150,8 +150,8 @@
         <label for="alphaLut">Alpha LUT formula</label>
         <input value="x" name="alphaLut" id="alphaLut">
 
-        <div hidden>
-            <div hidden> <!-- not supported in citro3d -->
+        <!-- not sure whether LOD makes much sense for this, also citro3d doesn't support it all that well
+            <div hidden>
                 <label for="minLod" hidden>Min LOD</label>
                 <input type="number" min="0" max="15" value="0" name="minLod" id="minLod">
                 <br>
@@ -162,7 +162,7 @@
             <label for="lodBias">LOD bias</label>
             <input type="number" name="lodBias" id="lodBias">
             <br>
-            <div hidden> <!-- not supported in citro3d -->
+            <div hidden>
                 <label for="mip1Offset">Mipmap level 1 offset</label>
                 <input type="number" min="0" max="255" value="128" name="mip1Offset" id="mip1Offset">
                 <br>
@@ -172,7 +172,7 @@
                 <label for="mip3Offset">Mipmap level 3 offset</label>
                 <input type="number" min="0" max="255" value="224" name="mip3Offset" id="mip3Offset">
             </div>
-        </div>
+        -->
     </form>
     <h4>Generated <a href=https://github.com/devkitPro/citro3d>citro3D</a> code</h4>
     <textarea id="citro3d" readonly style="width: 100%; height: 14em;"></textarea>
