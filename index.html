@@ -6,7 +6,14 @@
 </head>
 <body style="max-width: 60em; margin: auto;">
     <h1 style="text-align: center;">ProcTex</h1>
-    <canvas id="tex" width="512" height="512" style="display: block; margin: auto; border: 1px solid black; background: repeat left top/16px 16px conic-gradient(#404040 90deg, #808080 90deg 180deg, #404040 180deg 270deg, #808080 270deg)"></canvas>
+    <p>A visualizer for experimenting with the procedural texture functionality
+        offered by the PICA200 GPU, most notably used by the Nintendo 3DS.
+        <br>
+        Created by <a href=https://github.com/skyfloogle>Floogle</a>, using code inspired by and/or lifted from Citra.
+    </p>
+    <canvas id="tex" width="512" height="512" style="display: block; margin: auto; max-width: 100%; border: 1px solid black; background: repeat left top/16px 16px conic-gradient(#404040 90deg, #808080 90deg 180deg, #404040 180deg 270deg, #808080 270deg)"></canvas>
+
+    <a id="permalink">Permalink</a>
 
     <form name="settings">
         <h4>Display settings</h4>
@@ -167,6 +174,7 @@
             </div>
         </div>
     </form>
+    <h4>Generated <a href=https://github.com/devkitPro/citro3d>citro3D</a> code</h4>
     <textarea id="citro3d" readonly style="width: 100%; height: 14em;"></textarea>
 
     <script id="vert" type="x-shader/x-vertex">#version 300 es

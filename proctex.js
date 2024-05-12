@@ -9,8 +9,22 @@ const parser = new exprEval.Parser();
 /** @type {HTMLFormElement} */
 const form = document.forms["settings"];
 
+const params = new URLSearchParams(window.location.search);
+for (const entry of form) {
+    if (params.has(entry.name)) {
+        if (entry.type == "checkbox") {
+            entry.checked = true;
+        } else {
+            entry.value = params.get(entry.name);
+        }
+    }
+}
+
 /** @type {HTMLTextAreaElement} */
 const textArea = document.getElementById("citro3d");
+
+/** @type {HTMLAnchorElement} */
+const permalink = document.getElementById("permalink");
 
 const colorLut = document.getElementsByClassName('colorLut');
 const colorData = Array(colorLut.length * 4);
@@ -317,6 +331,7 @@ function draw() {
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
+    permalink.href = "?" + new URLSearchParams(new FormData(form)).toString();
     textArea.value = citro3d();
 }
 
