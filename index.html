@@ -16,17 +16,19 @@
             <option value="2">RGBA</option>
         </select>
         <div>
-            <label for="tcLeft">Left</label>
-            <input type="number" value="0" name="tcLeft" id="tcLeft">
-            <label for="tcTop">Top</label>
-            <input type="number" value="0" name="tcTop" id="tcTop">
-            <label for="tcRight">Right</label>
-            <input type="number" value="1" name="tcRight" id="tcRight">
-            <label for="tcBottom">Bottom</label>
-            <input type="number" value="1" name="tcBottom" id="tcBottom">
+            In the default 3DS texture format, X goes right and Y goes up.
+            <br>
+            <label for="tcX">X</label>
+            <input type="number" value="0" step="0.5" name="tcX" id="tcX">
+            <label for="tcY">Y</label>
+            <input type="number" value="0" step="0.5" name="tcY" id="tcY">
+            <label for="tcXS">X-stretch</label>
+            <input type="number" value="1" step="0.5" name="tcXS" id="tcXS">
+            <label for="tcYS">Y-stretch</label>
+            <input type="number" value="1" step="0.5" name="tcYS" id="tcYS">
         </div>
         <div>
-            <label for="uClamp">U-clamp</label>
+            <label for="uClamp">Clamp (U/V)</label>
             <select name="uClamp" id="uClamp">
                 <option value="0">Clamp to zero</option>
                 <option value="1">Clamp to edge</option>
@@ -34,14 +36,24 @@
                 <option value="3">Mirrored repeat</option>
                 <option value="4">Pulse</option>
             </select>
-            <br>
-            <label for="vClamp">V-clamp</label>
             <select name="vClamp" id="vClamp">
                 <option value="0">Clamp to zero</option>
                 <option value="1">Clamp to edge</option>
                 <option value="2">Symmetrical repeat</option>
                 <option value="3">Mirrored repeat</option>
                 <option value="4">Pulse</option>
+            </select>
+            <br>
+            <label for="uShift">Shift (U/V)</label>
+            <select name="uShift" id="uShift">
+                <option value="0">None</option>
+                <option value="1">Odd</option>
+                <option value="2">Even</option>
+            </select>
+            <select name="vShift" id="vShift">
+                <option value="0">None</option>
+                <option value="1">Odd</option>
+                <option value="2">Even</option>
             </select>
             <br>
             <label for="rgbFunc">RGB mapping function</label>
@@ -74,41 +86,21 @@
             <br>
             <label for="alphaSeparate">Handle alpha separately</label>
             <input type="checkbox" name="alphaSeparate" id="alphaSeparate">
-            <br>
-            <label for="uShift">U-shift</label>
-            <select name="uShift" id="uShift">
-                <option value="0">None</option>
-                <option value="1">Odd</option>
-                <option value="2">Even</option>
-            </select>
-            <br>
-            <label for="vShift">V-shift</label>
-            <select name="vShift" id="vShift">
-                <option value="0">None</option>
-                <option value="1">Odd</option>
-                <option value="2">Even</option>
-            </select>
         </div>
         <div>
             <label for="enableNoise">Noise enabled</label>
             <input type="checkbox" name="enableNoise" id="enableNoise">
             <br>
-            <label for="uNoiseAmpl">U noise amplitude</label>
+            <label for="uNoiseAmpl">Noise amplitude (U/V)</label>
             <input type="number" value="0" step="0.000244140625" min="-7" max="7" name="uNoiseAmpl" id="uNoiseAmpl">
-            <br>
-            <label for="uNoiseFreq">U noise frequency</label>
-            <input type="number" value="0" step="0.0009765625" name="uNoiseFreq" id="uNoiseFreq">
-            <br>
-            <label for="uNoisePhase">U noise phase</label>
-            <input type="number" value="0" step="0.0009765625" name="uNoisePhase" id="uNoisePhase">
-            <br>
-            <label for="vNoiseAmpl">V noise amplitude</label>
             <input type="number" value="0" step="0.000244140625" min="-7" max="7" name="vNoiseAmpl" id="vNoiseAmpl">
             <br>
-            <label for="vNoiseFreq">V noise frequency</label>
+            <label for="uNoiseFreq">Noise frequency (U/V)</label>
+            <input type="number" value="0" step="0.0009765625" name="uNoiseFreq" id="uNoiseFreq">
             <input type="number" value="0" step="0.0009765625" name="vNoiseFreq" id="vNoiseFreq">
             <br>
-            <label for="vNoisePhase">V noise phase</label>
+            <label for="uNoisePhase">Noise phase (U/V)</label>
+            <input type="number" value="0" step="0.0009765625" name="uNoisePhase" id="uNoisePhase">
             <input type="number" value="0" step="0.0009765625" name="vNoisePhase" id="vNoisePhase">
             <br>
             <label for="noiseLut">Noise LUT formula</label>

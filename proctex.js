@@ -124,19 +124,49 @@ function generateShaderSource() {
 }
 
 function citro3d() {
+    const clamps = [
+        "GPU_PT_CLAMP_TO_ZERO",
+        "GPU_PT_CLAMP_TO_EDGE",
+        "GPU_PT_REPEAT",
+        "GPU_PT_MIRRORED_REPEAT",
+        "GPU_PT_PULSE",
+    ];
+    const maps = [
+        "GPU_PT_U",
+        "GPU_PT_U2",
+        "GPU_PT_V",
+        "GPU_PT_V2",
+        "GPU_PT_ADD",
+        "GPU_PT_ADD2",
+        "GPU_PT_SQRT2",
+        "GPU_PT_MIN",
+        "GPU_PT_MAX",
+        "GPU_PT_RMAX",
+    ];
+    const shifts = [
+        "GPU_PT_NONE",
+        "GPU_PT_ODD",
+        "GPU_PT_EVEN",
+    ];
+    const filters = [
+        "GPU_PT_NEAREST",
+        "GPU_PT_LINEAR",
+        "GPU_PT_NEAREST_MIP_NEAREST",
+        "GPU_PT_LINEAR_MIP_NEAREST",
+        "GPU_PT_NEAREST_MIP_LINEAR",
+        "GPU_PT_LINEAR_MIP_LINEAR",
+    ];
     return `
         C3D_ProcTex pt;
         C3D_ProcTexInit(&pt, ${form.texOffset.value}, ${form.texWidth.value});
-        C3D_ProcTexClamp(&pt, ${form.uClamp.value}, ${form.vClamp.value});
-        C3D_ProcTexCombiner(&pt, ${!!form.alphaSeparate.value}, ${form.rgbFunc.value}, ${form.alphaFunc.value});
-        C3D_ProcTexShift(&pt, ${form.uShift.value}, ${form.vShift.value});
-        C3D_ProcTexFilter(&pt, ${form.minFilter.value});
+        C3D_ProcTexClamp(&pt, ${clamps[form.uClamp.value]}, ${clamps[form.vClamp.value]});
+        C3D_ProcTexCombiner(&pt, ${!!form.alphaSeparate.value}, ${clamps[form.rgbFunc.value]}, ${clamps[form.alphaFunc.value]});
+        C3D_ProcTexShift(&pt, ${shifts[form.uShift.value]}, ${shifts[form.vShift.value]});
+        C3D_ProcTexFilter(&pt, ${filters[form.minFilter.value]});
         ${form.enableNoise.checked ? `
             C3D_ProcTexNoiseCoefs(&pt, C3D_ProcTex_U, ${form.uNoiseAmpl.value}, ${form.uNoiseFreq.value}, ${form.uNoisePhase.value});
             C3D_ProcTexNoiseCoefs(&pt, C3D_ProcTex_V, ${form.vNoiseAmpl.value}, ${form.vNoiseFreq.value}, ${form.vNoisePhase.value});
         ` : ''}
-        C3D_ProcTexLodBias(&pt, ${form.lodBias.value});
-        
     `.replaceAll(/^\s+/gm, "").trimEnd();
 }
 
@@ -275,10 +305,14 @@ function draw() {
 
     // refresh texture coordinates
     gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-    const tcLeft = form.tcLeft.value;
-    const tcTop = form.tcTop.value;
-    const tcRight = form.tcRight.value;
-    const tcBottom = form.tcBottom.value;
+    const tcX = +form.tcX.value;
+    const tcY = +form.tcY.value;
+    const tcXS = +form.tcXS.value;
+    const tcYS = +form.tcYS.value;
+    const tcLeft = tcX - tcXS;
+    const tcRight = tcX + tcXS;
+    const tcTop = tcY + tcYS;
+    const tcBottom = tcY - tcYS;
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([tcLeft, tcTop, tcRight, tcTop, tcLeft, tcBottom, tcRight, tcBottom]), gl.DYNAMIC_DRAW);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
