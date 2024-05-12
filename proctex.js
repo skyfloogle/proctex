@@ -181,7 +181,7 @@ function citro3d() {
         C3D_ProcTex pt;
         C3D_ProcTexInit(&pt, ${form.texOffset.value}, ${form.texWidth.value});
         C3D_ProcTexClamp(&pt, ${clamps[form.uClamp.value]}, ${clamps[form.vClamp.value]});
-        C3D_ProcTexCombiner(&pt, ${!!form.alphaSeparate.value}, ${clamps[form.rgbFunc.value]}, ${clamps[form.alphaFunc.value]});
+        C3D_ProcTexCombiner(&pt, ${!!form.alphaSeparate.value}, ${maps[form.rgbFunc.value]}, ${maps[form.alphaFunc.value]});
         C3D_ProcTexShift(&pt, ${shifts[form.uShift.value]}, ${shifts[form.vShift.value]});
         C3D_ProcTexFilter(&pt, ${filters[form.minFilter.value]});
         ${form.enableNoise.checked ? `
