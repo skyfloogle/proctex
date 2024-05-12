@@ -71,7 +71,14 @@ function generateShaderSource() {
         out lowp vec4 fragColor;
 
         lowp vec3 readLut(lowp float coord) {
-            return texture(uLutData, vec2(coord / 2.0, 0.0)).rgb;
+            lowp float mulled = coord * 128.0;
+            lowp float floored = floor(mulled);
+            lowp float ceiled = ceil(mulled);
+            return mix(
+                texelFetch(uLutData, ivec2(floored, 0), 0),
+                texelFetch(uLutData, ivec2(ceiled, 0), 0),
+                fract(mulled)
+            ).rgb;
         }
 
         int ProcTexNoiseRand1D(int v) {
