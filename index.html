@@ -27,9 +27,9 @@
             In the default 3DS texture format, X goes right and Y goes up.
             <br>
             <label for="tcX">X</label>
-            <input type="number" value="0" step="0.5" name="tcX" id="tcX">
+            <input type="number" value="2" step="0.5" name="tcX" id="tcX">
             <label for="tcY">Y</label>
-            <input type="number" value="0" step="0.5" name="tcY" id="tcY">
+            <input type="number" value="2" step="0.5" name="tcY" id="tcY">
             <label for="tcXS">X-stretch</label>
             <input type="number" value="1" step="0.5" name="tcXS" id="tcXS">
             <label for="tcYS">Y-stretch</label>
@@ -42,14 +42,14 @@
                 <option value="0">Clamp to zero</option>
                 <option value="1">Clamp to edge</option>
                 <option value="2">Symmetrical repeat</option>
-                <option value="3">Mirrored repeat</option>
+                <option value="3" selected>Mirrored repeat</option>
                 <option value="4">Pulse</option>
             </select>
             <select name="vClamp" id="vClamp">
                 <option value="0">Clamp to zero</option>
                 <option value="1">Clamp to edge</option>
                 <option value="2">Symmetrical repeat</option>
-                <option value="3">Mirrored repeat</option>
+                <option value="3" selected>Mirrored repeat</option>
                 <option value="4">Pulse</option>
             </select>
             <br>
@@ -73,7 +73,7 @@
                 <option value="3">V²</option>
                 <option value="4">(U + V) / 2</option>
                 <option value="5">(U² + V²) / 2</option>
-                <option value="6">sqrt(U² + V²)</option>
+                <option value="6" selected>sqrt(U² + V²)</option>
                 <option value="7">Minimum</option>
                 <option value="8">Maximum</option>
                 <option value="9">Rmax</option>
@@ -110,19 +110,19 @@
         <h4>Noise settings</h4>
         <div>
             <label for="enableNoise">Noise enabled</label>
-            <input type="checkbox" name="enableNoise" id="enableNoise">
+            <input type="checkbox" name="enableNoise" id="enableNoise" checked>
             <br>
             <label for="uNoiseAmpl">Noise amplitude (U/V)</label>
-            <input type="number" value="0" step="0.000244140625" min="-7" max="7" name="uNoiseAmpl" id="uNoiseAmpl">
-            <input type="number" value="0" step="0.000244140625" min="-7" max="7" name="vNoiseAmpl" id="vNoiseAmpl">
+            <input type="number" value="0.1" step="0.1" min="-7" max="7" name="uNoiseAmpl" id="uNoiseAmpl">
+            <input type="number" value="0.1" step="0.1" min="-7" max="7" name="vNoiseAmpl" id="vNoiseAmpl">
             <br>
             <label for="uNoiseFreq">Noise frequency (U/V)</label>
-            <input type="number" value="0" step="0.0009765625" name="uNoiseFreq" id="uNoiseFreq">
-            <input type="number" value="0" step="0.0009765625" name="vNoiseFreq" id="vNoiseFreq">
+            <input type="number" value="0.3" step="0.001" name="uNoiseFreq" id="uNoiseFreq">
+            <input type="number" value="0.3" step="0.001" name="vNoiseFreq" id="vNoiseFreq">
             <br>
             <label for="uNoisePhase">Noise phase (U/V)</label>
-            <input type="number" value="0" step="0.0009765625" name="uNoisePhase" id="uNoisePhase">
-            <input type="number" value="0" step="0.0009765625" name="vNoisePhase" id="vNoisePhase">
+            <input type="number" value="0.1" step="0.01" name="uNoisePhase" id="uNoisePhase">
+            <input type="number" value="0.1" step="0.01" name="vNoisePhase" id="vNoisePhase">
             <br>
         </div>
         <h4>Lookup tables</h4>
@@ -131,8 +131,8 @@
         <input type="number" value="2" min="1" max="8" name="texWidth" id="texWidth">
         <label hidden for="texOffset">Colour LUT offset</label>
         <input hidden type="number" value="0" min="1" max="255" name="texOffset" id="texOffset">
-        <input type="color" name="colorLut0" class="colorLut" value="#000000">
-        <input type="color" name="colorLut1" class="colorLut" value="#ffffff">
+        <input type="color" name="colorLut0" class="colorLut" value="#4f1f1f">
+        <input type="color" name="colorLut1" class="colorLut" value="#d19e1f">
         <input type="color" name="colorLut2" class="colorLut">
         <input type="color" name="colorLut3" class="colorLut">
         <input type="color" name="colorLut4" class="colorLut">
@@ -145,10 +145,10 @@
         <input value="x*x*(3-2*x)" name="noiseLut" id="noiseLut">
         <br>
         <label for="rgbLut">RGB LUT formula</label>
-        <input value="sin(6*(x+0.125)*PI*2)" name="rgbLut" id="rgbLut">
+        <input value="abs(sin(6*(x+0.125)*PI*2))" name="rgbLut" id="rgbLut">
         <br>
         <label for="alphaLut">Alpha LUT formula</label>
-        <input value="sin(6*(x+0.125)*PI*2)" name="alphaLut" id="alphaLut">
+        <input value="x" name="alphaLut" id="alphaLut">
 
         <div hidden>
             <div hidden> <!-- not supported in citro3d -->
