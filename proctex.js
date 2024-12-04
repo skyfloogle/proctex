@@ -17,6 +17,10 @@ for (const entry of form) {
         } else {
             entry.value = params.get(entry.name);
         }
+    } else {
+        if (params.size > 0 && entry.type == "checkbox") {
+            entry.checked = false;
+        }
     }
 }
 
