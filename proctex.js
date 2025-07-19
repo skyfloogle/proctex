@@ -134,7 +134,7 @@ function generateShaderSource() {
             uv.y = ${clamps[form.vClamp.value].replaceAll("{0}", "uv.y")};
             lowp float u = uv.x;
             lowp float v = uv.y;
-            lowp float lut_coord = readLut(${maps[form.rgbFunc.value]}).g * float(${form.texWidth.value - 1});
+            lowp float lut_coord = clamp(readLut(${maps[form.rgbFunc.value]}).g, 0.0, 1.0) * float(${form.texWidth.value - 1});
             lowp vec4 final_colour = ${
                 form.minFilter.value % 2 != 0
                 // linear
